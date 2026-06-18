@@ -1,20 +1,29 @@
 import { configureStore } from "@reduxjs/toolkit";
 import tasksReducer from "../features/tasks/tasksSlice";
 
+const loadFromLocalStorage = () => {
+  try {
+    const serializedState = localStorage.getItem("todo_ml_v3");
+    if (serializedState === null) return undefined;
+    
+    return {
+      tasks: JSON.parse(serializedState)
+    };
+  } catch (e) {
+    console.warn("Hindi ma-load ang data mula sa localStorage:", e);
+    return undefined;
+  }
+};
+
+const preloadedState = loadFromLocalStorage();
+
 export const store = configureStore({
   reducer: {
     tasks: tasksReducer,
   },
+  preloadedState,
 });
 
-// Dati ito ay nasa loob ng useEffect sa App.jsx:
-//   useEffect(() => {
-//     localStorage.setItem("todo_ml_v3", JSON.stringify(tasks));
-//   }, [tasks]);
-//
-// Dito na lang natin ginagawa gamit ang store.subscribe — automatic itong
-// tumatakbo kapailanman magbago ang state, kaya hindi na kailangan ng
-// useEffect para dito sa App.jsx.
 store.subscribe(() => {
   localStorage.setItem("todo_ml_v3", JSON.stringify(store.getState().tasks));
 });
