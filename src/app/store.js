@@ -10,7 +10,7 @@ const loadFromLocalStorage = () => {
       tasks: JSON.parse(serializedState)
     };
   } catch (e) {
-    console.warn("Hindi ma-load ang data mula sa localStorage:", e);
+    console.warn("Unable to load data from localStorage:", e);
     return undefined;
   }
 };
