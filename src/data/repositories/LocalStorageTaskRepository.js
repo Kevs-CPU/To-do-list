@@ -8,7 +8,14 @@ export class LocalStorageTaskRepository extends ITaskRepository {
   _read() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw).map((t) => new Task(t)) : [];
+      return raw
+        ? JSON.parse(raw).map((t) => {
+            const task = new Task(t);
+            task.list = t.list || "default";
+            task.done = t.done || false;
+            return task;
+          })
+        : [];
     } catch {
       return [];
     }
@@ -20,7 +27,9 @@ export class LocalStorageTaskRepository extends ITaskRepository {
 
   addTask({ title, list }) {
     const tasks = this._read();
-    const task = new Task({ id: nanoid(), title, list, done: false });
+    const task = new Task({ id: nanoid(), title });
+    task.list = list || "default";
+    task.done = false;
     tasks.push(task);
     this._write(tasks);
     return task;
