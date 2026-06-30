@@ -1,4 +1,3 @@
-
 export class Task {
   constructor({ id, title, list = "default", done = false }) {
     
