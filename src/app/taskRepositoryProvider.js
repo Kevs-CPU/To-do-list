@@ -2,10 +2,10 @@ import { InMemoryTaskRepository } from "../data/repositories/InMemoryTaskReposit
 import { LocalStorageTaskRepository } from "../data/repositories/LocalStorageTaskRepository";
 
 const INIT_TASKS = [
-  { id: "1", title: "Check Today's Schedule" },
-  { id: "2", title: "Complete Important Tasks" },
-  { id: "3", title: "Review Daily Progress" },
-  { id: "4", title: "Prepare for Tomorrow" },
+  { id: "1", title: "Wake Up" },
+  { id: "2", title: "Have Breakfast" },
+  { id: "3", title: "Do Important Tasks" },
+  { id: "4", title: "Rest" },
 ];
 
 const REPOSITORY_TYPE = "localStorage";
