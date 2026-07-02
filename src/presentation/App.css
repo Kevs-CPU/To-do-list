@@ -152,12 +152,6 @@
   display: flex;
   gap: 2px;
   flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.task-item:hover .task-actions,
-.task-item:focus-within .task-actions {
   opacity: 1;
 }
 
