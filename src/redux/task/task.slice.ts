@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getTaskRepository } from '../../app/taskRepositoryProvider';
-import { AddTaskUseCase } from "../../domain/usecases/add_task_usecase";
-import { RemoveTaskUseCase } from "../../domain/usecases/remove_task_usecase";
-import { UpdateTaskUseCase } from "../../domain/usecases/update_task_usecase";
-import { GetAllTaskUseCase } from "../../domain/usecases/get_all_tasks_usecase";
-import { GetTaskUseCase } from "../../domain/usecases/get_task_usecase";
+import {
+  addTaskUseCase,
+  removeTaskUseCase,
+  updateTaskUseCase,
+  getAllTasksUseCase,
+  getTaskUseCase,
+} from "../../app/taskUseCaseProvider";
 
 interface Task {
   id: string;
@@ -25,8 +26,6 @@ const initialState: TaskState = {
   error: null,
 };
 
-const repo = () => getTaskRepository();
-
 const toPlainTask = (t: any): Task => ({
   id: t.id,
   title: t.title,
@@ -36,8 +35,7 @@ export const fetchTasks = createAsyncThunk(
   "tasks/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const usecase = new GetAllTaskUseCase(repo());
-      const tasks = await usecase.execute();
+      const tasks = await getAllTasksUseCase.execute();
       return tasks.map(toPlainTask);
     } catch (err: any) {
       return rejectWithValue(err.message);
@@ -49,8 +47,7 @@ export const fetchTaskById = createAsyncThunk(
   "tasks/fetchOne",
   async (id: string, { rejectWithValue }) => {
     try {
-      const usecase = new GetTaskUseCase(repo());
-      const task = await usecase.execute(id);
+      const task = await getTaskUseCase.execute(id);
       return toPlainTask(task);
     } catch (err: any) {
       return rejectWithValue(err.message);
@@ -62,8 +59,7 @@ export const addTask = createAsyncThunk(
   "tasks/add",
   async (payload: { title: string }, { rejectWithValue }) => {
     try {
-      const usecase = new AddTaskUseCase(repo());
-      const result = await usecase.execute(payload);
+      const result = await addTaskUseCase.execute(payload);
       return toPlainTask(result);
     } catch (err: any) {
       return rejectWithValue(err.message);
@@ -75,8 +71,7 @@ export const removeTask = createAsyncThunk(
   "tasks/remove",
   async (id: string, { rejectWithValue }) => {
     try {
-      const usecase = new RemoveTaskUseCase(repo());
-      await usecase.execute(id);
+      await removeTaskUseCase.execute(id);
       return id;
     } catch (err: any) {
       return rejectWithValue(err.message);
@@ -88,8 +83,7 @@ export const updateTask = createAsyncThunk(
   "tasks/update",
   async (payload: { id: string; title: string }, { rejectWithValue }) => {
     try {
-      const usecase = new UpdateTaskUseCase(repo());
-      const result = await usecase.execute(payload.id, { title: payload.title });
+      const result = await updateTaskUseCase.execute(payload.id, { title: payload.title });
       return toPlainTask(result);
     } catch (err: any) {
       return rejectWithValue(err.message);
@@ -107,7 +101,6 @@ const taskSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // fetchTasks
       .addCase(fetchTasks.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -121,7 +114,6 @@ const taskSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchTaskById
       .addCase(fetchTaskById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -135,7 +127,6 @@ const taskSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // addTask
       .addCase(addTask.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -149,7 +140,6 @@ const taskSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // removeTask
       .addCase(removeTask.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -163,7 +153,6 @@ const taskSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // updateTask
       .addCase(updateTask.pending, (state) => {
         state.loading = true;
         state.error = null;
