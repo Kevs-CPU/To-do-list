@@ -17,3 +17,7 @@ export const legacyStore = createStore(rootReducer, applyMiddleware(thunk));
 // therd task Enhance the Existing task to clean architecture  
 
 // first disapointed 
+// New learning 
+// New Enhancement 
+// New Growth 
+
