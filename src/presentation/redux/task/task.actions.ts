@@ -5,7 +5,7 @@ import {
   updateTaskUseCase,
   getAllTasksUseCase,
   getTaskUseCase,
-} from '../../taskUseCaseProvider';
+} from '../../../app/taskUseCaseProvider';
 
 interface Task {
   id: string;
