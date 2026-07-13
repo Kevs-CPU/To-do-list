@@ -1,45 +1,45 @@
-import { nanoid } from "@reduxjs/toolkit";
-import { Task } from "../../domain/entities/Task";
-
-const STORAGE_KEY = "todo_ml_v3";
+const STORAGE_KEY = 'tasks';
 
 export class LocalStorageTaskRepository {
-  _read() {
+  async getAll() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw).map((t) => new Task(t)) : [];
-    } catch {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
       return [];
     }
   }
 
-  _write(tasks) {
+  async getById(id) {
+    const tasks = await this.getAll();
+    return tasks.find(task => task.id === id) || null;
+  }
+
+  async add(task) {
+    const tasks = await this.getAll();
+    const newTask = {
+      ...task,
+      id: Date.now().toString()
+    };
+    tasks.push(newTask);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    return newTask;
   }
 
-  addTask({ title }) {
-    const tasks = this._read();
-    const task = new Task({ id: nanoid(), title });
-    tasks.push(task);
-    this._write(tasks);
+  async update(task) {
+    const tasks = await this.getAll();
+    const index = tasks.findIndex(t => t.id === task.id);
+    if (index === -1) throw new Error('Task not found');
+    tasks[index] = task;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     return task;
   }
 
-  getAllTasks() {
-    return this._read();
-  }
-
-  updateTask(id, changes) {
-    const tasks = this._read();
-    const task = tasks.find((t) => t.id === id);
-    if (!task) return null;
-    Object.assign(task, changes);
-    this._write(tasks);
-    return task;
-  }
-
-  removeTask(id) {
-    const tasks = this._read().filter((t) => t.id !== id);
-    this._write(tasks);
+  async remove(id) {
+    const tasks = await this.getAll();
+    const filtered = tasks.filter(t => t.id !== id);
+    if (filtered.length === tasks.length) throw new Error('Task not found');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    return id;
   }
 }

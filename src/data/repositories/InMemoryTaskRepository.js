@@ -1,29 +1,40 @@
-import { nanoid } from "@reduxjs/toolkit";
-import { Task } from "../../domain/entities/Task";
+let tasks = [];
+let nextId = 1;
 
 export class InMemoryTaskRepository {
-  constructor(initialTasks = []) {
-    this.tasks = initialTasks.map((t) => new Task(t));
+  async getAll() {
+    return [...tasks];
   }
 
-  addTask({ title }) {
-    const task = new Task({ id: nanoid(), title });
-    this.tasks.push(task);
+  async getById(id) {
+    return tasks.find(task => task.id === id) || null;
+  }
+
+  async add(task) {
+    const newTask = {
+      ...task,
+      id: String(nextId++)
+    };
+    tasks.push(newTask);
+    return newTask;
+  }
+
+  async update(task) {
+    const index = tasks.findIndex(t => t.id === task.id);
+    if (index === -1) throw new Error('Task not found');
+    tasks[index] = task;
     return task;
   }
 
-  getAllTasks() {
-    return [...this.tasks];
+  async remove(id) {
+    const filtered = tasks.filter(t => t.id !== id);
+    if (filtered.length === tasks.length) throw new Error('Task not found');
+    tasks = filtered;
+    return id;
   }
 
-  updateTask(id, changes) {
-    const task = this.tasks.find((t) => t.id === id);
-    if (!task) return null;
-    Object.assign(task, changes);
-    return task;
-  }
-
-  removeTask(id) {
-    this.tasks = this.tasks.filter((t) => t.id !== id);
+  clear() {
+    tasks = [];
+    nextId = 1;
   }
 }

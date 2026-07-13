@@ -1,11 +1,15 @@
 export interface Task {
   id: string;
   title: string;
+  completed: boolean;
 }
 
 export interface ITaskRepository {
-  addTask(input: { title: string }): Task | Promise<Task>;
-  getAllTasks(): Task[] | Promise<Task[]>;
-  updateTask(id: string, changes: Partial<Task>): Task | null | Promise<Task | null>;
-  removeTask(id: string): void | Promise<void>;
+  getAll(): Promise<Task[]>;
+  getById(id: string): Promise<Task | null>;
+  add(task: Omit<Task, 'id'>): Promise<Task>;
+  update(task: Task): Promise<Task>;
+  remove(id: string): Promise<string>;
 }
+
+export default ITaskRepository;

@@ -12,15 +12,15 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "ignoreDeprecations": "6.0",
-
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@app/*": ["./src/app/*"],
-      "@data/*": ["./src/data/*"],
-      "@domain/*": ["./src/domain/*"],
-      "@presentation/*": ["./src/presentation/*"],
-      "@redux/*": ["./src/redux/*"]
+      "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@data/*": ["src/data/*"],
+      "@domain/*": ["src/domain/*"],
+      "@usecases/*": ["src/usecases/*"],
+      "@repositories/*": ["src/data/repositories/*"],
+      "@redux/*": ["src/app/redux/*"]
     }
   },
   "include": ["src"]
