@@ -6,7 +6,6 @@ import {
   removeTask as removeTaskAction,
   updateTask as updateTaskAction,
 } from "./app/redux/task/task.slice";
-import TodoTable from "./app/components/todo/TodoTable";
 import "./App.css";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,15 +33,15 @@ export default function App() {
     }
 
     if (!EMAIL_REGEX.test(value)) {
-      setInputError("Please enter a valid email domain (e.g. gmail.com).");
-      return;
-    }
+  setInputError("Enter a valid email address.");
+  return;
+}
 
-    const domain = value.split("@")[1].toLowerCase();
-    if (!VALID_DOMAINS.includes(domain)) {
-      setInputError("Please enter a valid email domain (e.g. gmail.com).");
-      return;
-    }
+const domain = value.split("@")[1].toLowerCase();
+if (!VALID_DOMAINS.includes(domain)) {
+  setInputError("Only gmail.com is allowed.");
+  return;
+}
 
     dispatch(addTaskAction({ title: value }));
     setInput("");
