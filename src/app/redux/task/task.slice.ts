@@ -4,7 +4,6 @@ import {
   removeTaskUseCase,
   updateTaskUseCase,
   getAllTasksUseCase,
-  getTaskUseCase,
 } from "../../taskUseCaseProvider";
 
 interface Task {
@@ -14,14 +13,12 @@ interface Task {
 
 interface TaskState {
   tasks: Task[];
-  selectedTask: Task | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: TaskState = {
   tasks: [],
-  selectedTask: null,
   loading: false,
   error: null,
 };
@@ -37,18 +34,6 @@ export const fetchTasks = createAsyncThunk(
     try {
       const tasks = await getAllTasksUseCase.execute();
       return tasks.map(toPlainTask);
-    } catch (err: any) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
-
-export const fetchTaskById = createAsyncThunk(
-  "tasks/fetchOne",
-  async (id: string, { rejectWithValue }) => {
-    try {
-      const task = await getTaskUseCase.execute(id);
-      return toPlainTask(task);
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -94,11 +79,7 @@ export const updateTask = createAsyncThunk(
 const taskSlice = createSlice({
   name: "tasks",
   initialState,
-  reducers: {
-    clearSelectedTask: (state) => {
-      state.selectedTask = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTasks.pending, (state) => {
@@ -110,19 +91,6 @@ const taskSlice = createSlice({
         state.tasks = action.payload;
       })
       .addCase(fetchTasks.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-
-      .addCase(fetchTaskById.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchTaskById.fulfilled, (state, action) => {
-        state.loading = false;
-        state.selectedTask = action.payload;
-      })
-      .addCase(fetchTaskById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -169,5 +137,4 @@ const taskSlice = createSlice({
   },
 });
 
-export const { clearSelectedTask } = taskSlice.actions;
 export default taskSlice.reducer;
