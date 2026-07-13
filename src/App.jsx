@@ -9,6 +9,9 @@ import {
 import TodoTable from "./app/components/todo/TodoTable";
 import "./App.css";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const VALID_DOMAINS = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"];
+
 export default function App() {
   const tasks = useSelector((state) => state.tasks.tasks);
   const loading = useSelector((state) => state.tasks.loading);
@@ -16,15 +19,34 @@ export default function App() {
   const [input, setInput] = useState("");
   const [editId, setEditId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [inputError, setInputError] = useState("");
 
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
 
   const addTask = () => {
-    if (!input.trim()) return;
-    dispatch(addTaskAction({ title: input.trim() }));
+    const value = input.trim();
+
+    if (!value) {
+      setInputError("Email is required.");
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(value)) {
+      setInputError("Please enter a valid email domain (e.g. gmail.com).");
+      return;
+    }
+
+    const domain = value.split("@")[1].toLowerCase();
+    if (!VALID_DOMAINS.includes(domain)) {
+      setInputError("Please enter a valid email domain (e.g. gmail.com).");
+      return;
+    }
+
+    dispatch(addTaskAction({ title: value }));
     setInput("");
+    setInputError("");
   };
 
   const deleteTask = (id) => {
@@ -51,6 +73,20 @@ export default function App() {
   return (
     <div className="app-layout">
     <div className="main-wrapper">
+
+    {inputError && (
+      <div className="toast-container">
+        <div className="toast-error">
+          <span className="toast-icon">!</span>
+          <div className="toast-body">
+            <p className="toast-title">Invalid email</p>
+            <p className="toast-message">{inputError}</p>
+          </div>
+          <button className="toast-close" onClick={() => setInputError("")} aria-label="Dismiss">✕</button>
+        </div>
+      </div>
+    )}
+
          <header className="main-header">
     <div className="main-header-text">
         
@@ -61,12 +97,15 @@ export default function App() {
          </header >
     <div className="add-row">
         <input
-            className="add-input"
+            className={`add-input${inputError ? " add-input-error" : ""}`}
             name="newTask"
             id="newTask"
             placeholder="Add a new task…"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (inputError) setInputError("");
+            }}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
         />
           <button className="add-btn" onClick={addTask}>Add</button>
