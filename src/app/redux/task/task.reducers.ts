@@ -1,4 +1,4 @@
-import { ADD_TASK, REMOVE_TASK, UPDATE_TASK, GET_ALL_TASKS, GET_TASK } from './task.types';
+import { ADD_TASK, REMOVE_TASK, UPDATE_TASK, GET_ALL_TASKS } from './task.types';
 
 interface Task {
   id: string;
@@ -7,10 +7,9 @@ interface Task {
 
 interface TaskState {
   tasks: Task[];
-  selectedTask: Task | null;
 }
 
-const initialState: TaskState = { tasks: [], selectedTask: null };
+const initialState: TaskState = { tasks: [] };
 
 export const taskReducer = (state = initialState, action: any): TaskState => {
   switch (action.type) {
@@ -30,9 +29,6 @@ export const taskReducer = (state = initialState, action: any): TaskState => {
 
     case GET_ALL_TASKS:
       return { ...state, tasks: action.payload };
-
-    case GET_TASK:
-      return { ...state, selectedTask: action.payload };
 
     default:
       return state;

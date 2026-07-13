@@ -14,8 +14,8 @@ export class InMemoryTaskRepository extends ITaskRepository {
     return task;
   }
 
-  removeTask(id) {
-    this.tasks = this.tasks.filter((t) => t.id !== id);
+  getAllTasks() {
+    return [...this.tasks];
   }
 
   updateTask(id, changes) {
@@ -25,11 +25,7 @@ export class InMemoryTaskRepository extends ITaskRepository {
     return task;
   }
 
-  getAllTasks() {
-    return [...this.tasks];
-  }
-
-  getTask(id) {
-    return this.tasks.find((t) => t.id === id) ?? null;
+  removeTask(id) {
+    this.tasks = this.tasks.filter((t) => t.id !== id);
   }
 }

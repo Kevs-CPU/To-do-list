@@ -26,9 +26,8 @@ export class LocalStorageTaskRepository extends ITaskRepository {
     return task;
   }
 
-  removeTask(id) {
-    const tasks = this._read().filter((t) => t.id !== id);
-    this._write(tasks);
+  getAllTasks() {
+    return this._read();
   }
 
   updateTask(id, changes) {
@@ -40,11 +39,8 @@ export class LocalStorageTaskRepository extends ITaskRepository {
     return task;
   }
 
-  getAllTasks() {
-    return this._read();
-  }
-
-  getTask(id) {
-    return this._read().find((t) => t.id === id) ?? null;
+  removeTask(id) {
+    const tasks = this._read().filter((t) => t.id !== id);
+    this._write(tasks);
   }
 }

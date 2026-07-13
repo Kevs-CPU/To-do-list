@@ -1,10 +1,9 @@
-import { ADD_TASK, REMOVE_TASK, UPDATE_TASK, GET_ALL_TASKS, GET_TASK } from './task.types';
+import { ADD_TASK, REMOVE_TASK, UPDATE_TASK, GET_ALL_TASKS } from './task.types';
 import {
   addTaskUseCase,
   removeTaskUseCase,
   updateTaskUseCase,
   getAllTasksUseCase,
-  getTaskUseCase,
 } from '../../taskUseCaseProvider';
 
 interface Task {
@@ -32,19 +31,9 @@ export const getAllTasks = (tasks: Task[]) => ({
   payload: tasks,
 });
 
-export const getTask = (task: Task) => ({
-  type: GET_TASK,
-  payload: task,
-});
-
 export const fetchAllTasksThunk = () => async (dispatch: any) => {
   const tasks = await getAllTasksUseCase.execute();
   dispatch(getAllTasks(tasks));
-};
-
-export const fetchTaskThunk = (id: string) => async (dispatch: any) => {
-  const task = await getTaskUseCase.execute(id);
-  dispatch(getTask(task));
 };
 
 export const addTaskThunk = (title: string) => async (dispatch: any) => {
