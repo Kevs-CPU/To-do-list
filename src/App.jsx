@@ -48,38 +48,18 @@ export default function App() {
 
   const handleGmailChange = (e) => {
     setGmailInput(e.target.value);
-    if (error) {
-      dispatch(clearError());
-    }
+    dispatch(clearError());
   };
 
   const handleTaskChange = (e) => {
     setTaskInput(e.target.value);
-    if (error) {
-      dispatch(clearError());
-    }
+    dispatch(clearError());
   };
 
   const handleAddTask = async () => {
-    if (!gmailInput.trim()) {
-      dispatch({ type: 'tasks/setError', payload: 'Gmail address is required' });
-      gmailInputRef.current?.focus();
-      return;
-    }
-
-    if (!taskInput.trim()) {
-      dispatch({ type: 'tasks/setError', payload: 'Task description is required' });
-      taskInputRef.current?.focus();
-      return;
-    }
-
     setIsSubmitting(true);
-
     try {
-      await dispatch(addTask({ 
-        gmail: gmailInput.trim(), 
-        task: taskInput.trim() 
-      })).unwrap();
+      await dispatch(addTask({ gmail: gmailInput, task: taskInput })).unwrap();
       setGmailInput("");
       setTaskInput("");
       setShowAddBar(false);
@@ -134,7 +114,7 @@ export default function App() {
   const handleKeyDown = (e, action) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (e.target === gmailInputRef.current && gmailInput.trim()) {
+      if (e.target === gmailInputRef.current) {
         taskInputRef.current?.focus();
       } else if (e.target === taskInputRef.current) {
         action();
@@ -332,9 +312,9 @@ export default function App() {
                         placeholder="Enter Gmail address"
                         value={editText}
                         onChange={(e) => {
-                          setEditText(e.target.value);
-                          if (error) dispatch(clearError());
-                        }}
+                        dispatch(setEditText(e.target.value));
+                        dispatch(clearError());
+                               }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") handleSaveEdit(todo.id);
                           if (e.key === "Escape") resetEdit();
