@@ -1,10 +1,11 @@
-import { InMemoryTaskRepository } from "../data/repositories/InMemoryTaskRepository";
-import { LocalStorageTaskRepository } from "../data/repositories/LocalStorageTaskRepository";
+// app/taskUseCaseProvider.js
+import { InMemoryTaskRepository } from "./repositories/InMemoryTaskRepository";
+import { LocalStorageTaskRepository } from "./repositories/LocalStorageTaskRepository";
 
-import { AddTaskUseCase } from "../domain/usecases/add_task_usecase";
-import { RemoveTaskUseCase } from "../domain/usecases/remove_task_usecase";
-import { UpdateTaskUseCase } from "../domain/usecases/update_task_usecase";
-import { GetAllTaskUseCase } from "../domain/usecases/get_all_tasks_usecase";
+import { AddTaskUseCase } from "./usecases/add_task_usecase";
+import { RemoveTaskUseCase } from "./usecases/remove_task_usecase";
+import { UpdateTaskUseCase } from "./usecases/update_task_usecase";
+import { GetAllTasksUseCase } from "./usecases/get_all_tasks_usecase";
 
 const REPOSITORY_TYPE = "localStorage";
 
@@ -20,7 +21,7 @@ function getTaskRepository() {
       repositoryInstance = new InMemoryTaskRepository();
     }
   } catch (err) {
-    console.error(err);
+    console.error("Failed to initialize repository:", err);
     repositoryInstance = new InMemoryTaskRepository();
   }
 
@@ -32,4 +33,4 @@ const repo = getTaskRepository();
 export const addTaskUseCase = new AddTaskUseCase(repo);
 export const removeTaskUseCase = new RemoveTaskUseCase(repo);
 export const updateTaskUseCase = new UpdateTaskUseCase(repo);
-export const getAllTasksUseCase = new GetAllTaskUseCase(repo);
+export const getAllTasksUseCase = new GetAllTasksUseCase(repo);

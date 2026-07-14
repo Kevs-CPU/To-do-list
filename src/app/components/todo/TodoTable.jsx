@@ -7,29 +7,37 @@ function getColumns({ editId, editText, setEditText, onDelete, onStartEdit, onSa
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => 
+            render: (text, record) =>
                 editId === record.id ? (
-                    <Input 
-                        value={editText} 
+                    <Input
+                        value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         onPressEnter={() => onSaveEdit(record.id)}
+                        autoFocus
                     />
-                ) : text,
+                ) : (
+                    text
+                ),
         },
         {
             title: 'Action',
             key: 'action',
+            width: 200,
             render: (_, record) => (
                 <Space size="middle">
                     {editId === record.id ? (
                         <>
-                            <Button type="primary" onClick={() => onSaveEdit(record.id)}>Save</Button>
+                            <Button type="primary" onClick={() => onSaveEdit(record.id)}>
+                                Save
+                            </Button>
                             <Button onClick={onCancelEdit}>Cancel</Button>
                         </>
                     ) : (
                         <>
                             <Button onClick={() => onStartEdit(record)}>Edit</Button>
-                            <Button danger onClick={() => onDelete(record)}>Delete</Button>
+                            <Button danger onClick={() => onDelete(record)}>
+                                Delete
+                            </Button>
                         </>
                     )}
                 </Space>

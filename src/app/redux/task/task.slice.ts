@@ -5,24 +5,34 @@ import { AddTaskUseCase } from '../../../domain/usecases/add_task_usecase';
 import { UpdateTaskUseCase } from '../../../domain/usecases/update_task_usecase';
 import { RemoveTaskUseCase } from '../../../domain/usecases/remove_task_usecase';
 
-// Types
-interface Task {
+export interface Task {
   id: string;
   title: string;
   completed: boolean;
 }
 
-interface TaskState {
+export type FilterType = 'all' | 'active' | 'completed';
+
+export interface TaskState {
   tasks: Task[];
   loading: boolean;
   error: string | null;
-  filter: 'all' | 'active' | 'completed';
+  filter: FilterType;
+  editId: string | null;
+  editText: string;
 }
 
-// Initialize repository
+const initialState: TaskState = {
+  tasks: [],
+  loading: false,
+  error: null,
+  filter: 'all',
+  editId: null,
+  editText: '',
+};
+
 const taskRepository = new LocalStorageTaskRepository();
 
-// Async thunks
 export const fetchTasks = createAsyncThunk<Task[], void>(
   'tasks/fetchTasks',
   async (_, { rejectWithValue }) => {
@@ -44,13 +54,15 @@ export const addTask = createAsyncThunk<Task, { title: string }>(
       const result = await useCase.execute(title);
       return result as Task;
     } catch (error: any) {
-      // Error message from use case (e.g., "Please enter a valid Gmail address")
       return rejectWithValue(error.message || 'Failed to add task');
     }
   }
 );
 
-export const updateTask = createAsyncThunk<Task, { id: string; title?: string; completed?: boolean }>(
+export const updateTask = createAsyncThunk<
+  Task,
+  { id: string; title?: string; completed?: boolean }
+>(
   'tasks/updateTask',
   async ({ id, title, completed }, { rejectWithValue }) => {
     try {
@@ -58,7 +70,6 @@ export const updateTask = createAsyncThunk<Task, { id: string; title?: string; c
       const result = await useCase.execute({ id, title, completed });
       return result as Task;
     } catch (error: any) {
-      // Error message from use case (e.g., "Please enter a valid Gmail address")
       return rejectWithValue(error.message || 'Failed to update task');
     }
   }
@@ -77,14 +88,6 @@ export const removeTask = createAsyncThunk<string, string>(
   }
 );
 
-// Initial state
-const initialState: TaskState = {
-  tasks: [],
-  loading: false,
-  error: null,
-  filter: 'all',
-};
-
 const taskSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -92,8 +95,27 @@ const taskSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setFilter: (state, action: PayloadAction<'all' | 'active' | 'completed'>) => {
+    setError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+    },
+    setFilter: (state, action: PayloadAction<FilterType>) => {
       state.filter = action.payload;
+    },
+    setEditId: (state, action: PayloadAction<string | null>) => {
+      state.editId = action.payload;
+    },
+    setEditText: (state, action: PayloadAction<string>) => {
+      state.editText = action.payload;
+    },
+    clearEdit: (state) => {
+      state.editId = null;
+      state.editText = '';
+    },
+    toggleTaskLocally: (state, action: PayloadAction<string>) => {
+      const task = state.tasks.find(t => t.id === action.payload);
+      if (task) {
+        task.completed = !task.completed;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -110,14 +132,20 @@ const taskSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string || 'Failed to fetch tasks';
       })
+      .addCase(addTask.pending, (state) => {
+        state.error = null;
+      })
       .addCase(addTask.fulfilled, (state, action) => {
         if (action.payload) {
           state.tasks.push(action.payload);
-          state.error = null; // Clear error on success
+          state.error = null;
         }
       })
       .addCase(addTask.rejected, (state, action) => {
         state.error = action.payload as string || 'Failed to add task';
+      })
+      .addCase(updateTask.pending, (state) => {
+        state.error = null;
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         if (action.payload) {
@@ -125,16 +153,25 @@ const taskSlice = createSlice({
           if (index !== -1) {
             state.tasks[index] = action.payload;
           }
-          state.error = null; // Clear error on success
+          state.error = null;
+          state.editId = null;
+          state.editText = '';
         }
       })
       .addCase(updateTask.rejected, (state, action) => {
         state.error = action.payload as string || 'Failed to update task';
       })
+      .addCase(removeTask.pending, (state) => {
+        state.error = null;
+      })
       .addCase(removeTask.fulfilled, (state, action) => {
         if (action.payload) {
           state.tasks = state.tasks.filter(t => t.id !== action.payload);
-          state.error = null; // Clear error on success
+          state.error = null;
+          if (state.editId === action.payload) {
+            state.editId = null;
+            state.editText = '';
+          }
         }
       })
       .addCase(removeTask.rejected, (state, action) => {
@@ -143,5 +180,14 @@ const taskSlice = createSlice({
   },
 });
 
-export const { clearError, setFilter } = taskSlice.actions;
+export const {
+  clearError,
+  setError,
+  setFilter,
+  setEditId,
+  setEditText,
+  clearEdit,
+  toggleTaskLocally,
+} = taskSlice.actions;
+
 export default taskSlice.reducer;

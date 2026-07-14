@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  fetchTasks,
-  addTask,
-  updateTask,
-  removeTask,
   clearError,
   setFilter,
+  addTask,
+  fetchTasks,
+  updateTask,
+  removeTask,
+  setEditId,
+  setEditText,
+  clearEdit,
 } from "./app/redux/task/task.slice";
 import "./App.css";
 
@@ -17,15 +20,23 @@ export default function App() {
   const loading = useSelector((state) => state.tasks.loading || false);
   const error = useSelector((state) => state.tasks.error);
   const filter = useSelector((state) => state.tasks.filter || 'all');
+  const editId = useSelector((state) => state.tasks.editId);
+  const editText = useSelector((state) => state.tasks.editText);
+  
   const activeCount = useSelector((state) => {
     const tasks = state.tasks.tasks || [];
     return tasks.filter(task => !task.completed).length;
   });
 
-  // Local UI State
+  const filteredTasks = useSelector((state) => {
+    const tasks = state.tasks.tasks || [];
+    const filter = state.tasks.filter || 'all';
+    if (filter === "active") return tasks.filter(task => !task.completed);
+    if (filter === "completed") return tasks.filter(task => task.completed);
+    return tasks;
+  });
+
   const [input, setInput] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [editText, setEditText] = useState("");
   const [showAddBar, setShowAddBar] = useState(false);
 
   const inputRef = useRef(null);
@@ -40,52 +51,59 @@ export default function App() {
     }
   }, [showAddBar]);
 
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "active") return !task.completed;
-    if (filter === "completed") return task.completed;
-    return true;
-  });
-
-  // UI Event Handlers
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!input.trim()) return;
-    dispatch(addTask({ title: input }));
-    setInput("");
-    setShowAddBar(false);
+    
+    try {
+      await dispatch(addTask({ title: input })).unwrap();
+      setInput("");
+      setShowAddBar(false);
+      dispatch(clearError());
+    } catch (error) {
+      // Error is already in state from rejected thunk
+      console.error('Add task failed:', error);
+    }
   };
 
-  const handleDeleteTask = (id) => {
+  const handleDeleteTask = async (id) => {
     if (editId === id) resetEdit();
-    dispatch(removeTask(id));
+    try {
+      await dispatch(removeTask(id)).unwrap();
+    } catch (error) {
+      console.error('Delete task failed:', error);
+    }
   };
 
   const handleStartEdit = (todo) => {
-    setEditId(todo.id);
-    setEditText(todo.title);
+    dispatch(setEditId(todo.id));
+    dispatch(setEditText(todo.title));
   };
 
   const resetEdit = () => {
-    setEditId(null);
-    setEditText("");
+    dispatch(clearEdit());
     dispatch(clearError());
   };
 
-  const handleSaveEdit = (id) => {
-    if (!editText.trim()) {
-      dispatch(clearError());
-      return;
+  const handleSaveEdit = async (id) => {
+    try {
+      await dispatch(updateTask({ id, title: editText })).unwrap();
+      resetEdit();
+    } catch (error) {
+      console.error('Update task failed:', error);
     }
-    dispatch(updateTask({ id, title: editText }));
-    resetEdit();
   };
 
-  const handleToggleComplete = (id) => {
-    const task = tasks.find(t => t.id === id);
-    if (task) {
-      dispatch(updateTask({ 
-        id, 
-        completed: !task.completed  // Toggle!
-      }));
+  const handleToggleComplete = async (id) => {
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        await dispatch(updateTask({ 
+          id, 
+          completed: !task.completed 
+        })).unwrap();
+      }
+    } catch (error) {
+      console.error('Toggle task failed:', error);
     }
   };
 
@@ -105,14 +123,12 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* Header */}
       <header className="topbar">
         <div className="topbar-content">
           <div className="topbar-title">
             <span className="topbar-icon">📋</span>
             <div>
               <span className="topbar-heading">Task Manager</span>
-              <span className="topbar-sub">Manage tasks with Gmail</span>
             </div>
           </div>
           <div className="topbar-stats">
@@ -121,7 +137,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* Error Toast */}
       {error && (
         <div className="toast-error">
           <span className="toast-icon">⚠️</span>
@@ -136,7 +151,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Add Bar Modal */}
       <div className={`add-bar-overlay ${showAddBar ? "active" : ""}`}>
         <div className="add-bar-modal">
           <div className="add-bar-header">
@@ -191,7 +205,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Filter Row */}
       <div className="filter-row">
         <div className="filter-group">
           {["all", "active", "completed"].map((f) => (
@@ -212,7 +225,6 @@ export default function App() {
         </span>
       </div>
 
-      {/* Task List */}
       <main className="task-scroll">
         {loading && (
           <div className="empty-state">
@@ -262,7 +274,7 @@ export default function App() {
                         placeholder="Enter Gmail address"
                         value={editText}
                         onChange={(e) => {
-                          setEditText(e.target.value);
+                          dispatch(setEditText(e.target.value));
                           dispatch(clearError());
                         }}
                         onKeyDown={(e) => {
@@ -341,7 +353,6 @@ export default function App() {
         </ul>
       </main>
 
-      {/* FAB Button */}
       <button
         className="fab"
         onClick={() => setShowAddBar(true)}

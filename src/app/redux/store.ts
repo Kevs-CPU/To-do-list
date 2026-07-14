@@ -9,6 +9,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       thunk: true,
     }),
+  devTools: true, 
 });
 
 export type RootState = ReturnType<typeof store.getState>;
