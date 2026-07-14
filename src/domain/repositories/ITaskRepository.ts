@@ -1,8 +1,4 @@
-export interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-}
+import { Task } from '../entities/Task';
 
 export interface ITaskRepository {
   getAll(): Promise<Task[]>;
