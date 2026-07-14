@@ -94,7 +94,7 @@ export const toggleTaskComplete = createAsyncThunk<Task, string>(
     try {
       const state = getState() as { tasks: TaskState };
       const task = state.tasks.tasks.find(t => t.id === id);
-      
+
       if (!task) {
         throw new Error('Task not found');
       }
@@ -104,7 +104,7 @@ export const toggleTaskComplete = createAsyncThunk<Task, string>(
         id,
         completed: !task.completed
       });
-      
+
       return result as Task;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to toggle task');
@@ -148,12 +148,9 @@ const taskSlice = createSlice({
       state.editId = null;
       state.editText = '';
     },
-    toggleTaskLocally: (state, action: PayloadAction<string>) => {
-      const task = state.tasks.find(t => t.id === action.payload);
-      if (task) {
-        task.completed = !task.completed;
-      }
-    },
+    // ✅ toggleTaskLocally removed — it was dead code (unused after
+    // the component switched to the `toggleTaskComplete` thunk), and
+    // it also mutated state without persisting through the repository.
   },
   extraReducers: (builder) => {
     builder
@@ -239,7 +236,6 @@ export const {
   setEditId,
   setEditText,
   clearEdit,
-  toggleTaskLocally,
 } = taskSlice.actions;
 
 export default taskSlice.reducer;

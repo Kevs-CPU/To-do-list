@@ -19,8 +19,6 @@ import "./App.css";
 export default function App() {
   const dispatch = useDispatch();
 
-  // ✅ Dead code removed: `const tasks = useSelector(...)` was unused
-  // after handleToggleComplete moved its logic into the thunk.
   const loading = useSelector((state) => state.tasks.loading || false);
   const error = useSelector((state) => state.tasks.error);
   const filter = useSelector((state) => state.tasks.filter || 'all');
