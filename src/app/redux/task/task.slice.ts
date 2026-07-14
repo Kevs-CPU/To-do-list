@@ -88,6 +88,19 @@ export const removeTask = createAsyncThunk<string, string>(
   }
 );
 
+export const selectFilteredTasks = (state: { tasks: TaskState }) => {
+  const tasks = state.tasks.tasks || [];
+  const filter = state.tasks.filter || 'all';
+  if (filter === "active") return tasks.filter(task => !task.completed);
+  if (filter === "completed") return tasks.filter(task => task.completed);
+  return tasks;
+};
+
+export const selectActiveCount = (state: { tasks: TaskState }) => {
+  const tasks = state.tasks.tasks || [];
+  return tasks.filter(task => !task.completed).length;
+};
+
 const taskSlice = createSlice({
   name: 'tasks',
   initialState,

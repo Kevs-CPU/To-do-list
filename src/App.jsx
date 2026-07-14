@@ -10,6 +10,8 @@ import {
   setEditId,
   setEditText,
   clearEdit,
+  selectFilteredTasks,
+  selectActiveCount,
 } from "./app/redux/task/task.slice";
 import "./App.css";
 
@@ -23,18 +25,8 @@ export default function App() {
   const editId = useSelector((state) => state.tasks.editId);
   const editText = useSelector((state) => state.tasks.editText);
   
-  const activeCount = useSelector((state) => {
-    const tasks = state.tasks.tasks || [];
-    return tasks.filter(task => !task.completed).length;
-  });
-
-  const filteredTasks = useSelector((state) => {
-    const tasks = state.tasks.tasks || [];
-    const filter = state.tasks.filter || 'all';
-    if (filter === "active") return tasks.filter(task => !task.completed);
-    if (filter === "completed") return tasks.filter(task => task.completed);
-    return tasks;
-  });
+  const activeCount = useSelector(selectActiveCount);
+  const filteredTasks = useSelector(selectFilteredTasks);
 
   const [input, setInput] = useState("");
   const [showAddBar, setShowAddBar] = useState(false);
@@ -60,7 +52,6 @@ export default function App() {
       setShowAddBar(false);
       dispatch(clearError());
     } catch (error) {
-      // Error is already in state from rejected thunk
       console.error('Add task failed:', error);
     }
   };
